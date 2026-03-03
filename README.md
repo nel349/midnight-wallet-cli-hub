@@ -6,6 +6,8 @@
 
 A standalone CLI wallet for the [Midnight](https://midnight.network) blockchain. Manage wallets, check balances, transfer NIGHT tokens, and run a local development network — all from the terminal.
 
+> **Note:** This repository hosts documentation and issue tracking. Source code will be open-sourced in a future release.
+
 ## Install
 
 ```bash
