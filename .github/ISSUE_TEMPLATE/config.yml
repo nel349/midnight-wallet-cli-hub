@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: npm Package
+    url: https://www.npmjs.com/package/midnight-wallet-cli
+    about: View the package on npm
+  - name: Documentation
+    url: https://github.com/nel349/midnight-wallet-cli-hub/tree/main/docs
+    about: Read the documentation
