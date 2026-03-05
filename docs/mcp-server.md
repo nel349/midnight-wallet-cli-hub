@@ -16,8 +16,7 @@ Create `.mcp.json` in your project root:
 {
   "mcpServers": {
     "midnight-wallet": {
-      "command": "npx",
-      "args": ["-y", "midnight-wallet-cli@latest", "--mcp"]
+      "command": "midnight-wallet-mcp"
     }
   }
 }
@@ -31,8 +30,7 @@ Add to `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS)
 {
   "mcpServers": {
     "midnight-wallet": {
-      "command": "npx",
-      "args": ["-y", "midnight-wallet-cli@latest", "--mcp"]
+      "command": "midnight-wallet-mcp"
     }
   }
 }
@@ -46,8 +44,7 @@ Create `.cursor/mcp.json` in your project root:
 {
   "mcpServers": {
     "midnight-wallet": {
-      "command": "npx",
-      "args": ["-y", "midnight-wallet-cli@latest", "--mcp"]
+      "command": "midnight-wallet-mcp"
     }
   }
 }
@@ -62,8 +59,7 @@ Create `.vscode/mcp.json` in your project root:
   "servers": {
     "midnight-wallet": {
       "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "midnight-wallet-cli@latest", "--mcp"]
+      "command": "midnight-wallet-mcp"
     }
   }
 }
@@ -77,14 +73,13 @@ Add to `~/.codeium/windsurf/mcp_config.json`:
 {
   "mcpServers": {
     "midnight-wallet": {
-      "command": "npx",
-      "args": ["-y", "midnight-wallet-cli@latest", "--mcp"]
+      "command": "midnight-wallet-mcp"
     }
   }
 }
 ```
 
-> **Tip:** If you installed globally (`npm install -g midnight-wallet-cli`), you can use `"command": "midnight-wallet-mcp"` instead of the `npx` form.
+> **Tip:** If you haven't installed globally, use `"command": "npx"` with `"args": ["-y", "midnight-wallet-cli@latest", "--mcp"]` instead.
 
 ## Available Tools
 

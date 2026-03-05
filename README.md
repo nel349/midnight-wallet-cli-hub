@@ -4,7 +4,7 @@
 [![npm downloads](https://img.shields.io/npm/dm/midnight-wallet-cli)](https://npm-stat.com/charts.html?package=midnight-wallet-cli)
 [![License](https://img.shields.io/npm/l/midnight-wallet-cli)](https://www.apache.org/licenses/LICENSE-2.0)
 
-A standalone CLI wallet for the [Midnight](https://midnight.network) blockchain. Manage wallets, check balances, transfer NIGHT tokens, and run a local development network — all from the terminal.
+A standalone CLI wallet for the [Midnight](https://midnight.network) blockchain. Manage wallets, check balances, transfer NIGHT tokens, and run a local network — all from the terminal.
 
 > **Note:** This repository hosts documentation and issue tracking. Source code will be open-sourced in a future release.
 
@@ -24,7 +24,7 @@ This installs two commands: `midnight` (or `mn` for short) and `midnight-wallet-
 | `midnight info` | Display wallet address, network, creation date |
 | `midnight balance [address]` | Check unshielded NIGHT balance |
 | `midnight transfer <to> <amount>` | Send NIGHT tokens to another address |
-| `midnight airdrop <amount>` | Fund wallet from genesis (local network only) |
+| `midnight airdrop <amount>` | Fund wallet from genesis (undeployed network only) |
 | `midnight dust register` | Register NIGHT UTXOs for dust (fee token) generation |
 | `midnight dust status` | Check dust registration status and balance |
 | `midnight address --seed <hex>` | Derive an address from a seed |
@@ -32,39 +32,40 @@ This installs two commands: `midnight` (or `mn` for short) and `midnight-wallet-
 | `midnight inspect-cost` | Display current block cost limits |
 | `midnight config get/set` | Manage persistent config (default network, etc.) |
 | `midnight localnet up/stop/down/status` | Manage a local Midnight network via Docker |
-| `midnight help` | Show usage for all commands |
+| `midnight help [command]` | Show usage for all or a specific command |
 
 ## Quick Start
 
 ```bash
-# 1. Start local network
+# Start local network
 midnight localnet up
 
-# 2. Generate a wallet
+# Generate a wallet
 midnight generate --network undeployed
 
-# 3. Fund your wallet (local network only)
+# Airdrop tokens and register dust
 midnight airdrop 1000
+midnight dust register
 
-# 4. Check balance
+# Check balance
 midnight balance
 
-# 5. Transfer NIGHT tokens
+# Transfer NIGHT
 midnight transfer mn_addr_undeployed1... 100
 ```
 
 See [Getting Started](docs/getting-started.md) for a detailed walkthrough.
 
-## JSON Output
+## JSON Output for Automation
 
-Every command supports `--json` for structured, machine-readable output:
+Every command supports `--json` for structured output:
 
 ```bash
 midnight balance --json
-# {"address":"mn_addr_...","network":"undeployed","balances":{"NIGHT":"1000.000000"},"utxoCount":1,"txCount":1}
+# → {"address":"mn_addr_...","network":"undeployed","balances":{"NIGHT":"504.850000"},"utxoCount":2,"txCount":8}
 
 midnight transfer mn_addr_... 100 --json
-# {"txHash":"00ab...","amount":100,"recipient":"mn_addr_...","network":"undeployed"}
+# → {"txHash":"00ab...","amount":100,"recipient":"mn_addr_...","network":"undeployed"}
 ```
 
 When `--json` is active:
@@ -72,34 +73,120 @@ When `--json` is active:
 - stderr is fully suppressed (no spinners, no formatting)
 - Errors produce: `{"error":true,"code":"...","message":"...","exitCode":N}`
 
+Run `midnight help --json` for a full capability manifest, or `midnight help --agent` for a comprehensive AI agent reference.
+
 See [JSON Output Reference](docs/json-output.md) for all schemas and error codes.
+
+## Supported Networks
+
+| Network | Description |
+|---------|-------------|
+| `undeployed` | Local network via Docker (`midnight localnet up`) |
+
+See [Networks](docs/networks.md) for configuration details.
 
 ## MCP Server for AI Agents
 
-The package includes an MCP (Model Context Protocol) server that exposes all wallet operations as typed tools. AI agents call them directly via JSON-RPC over stdio.
+The package includes an MCP (Model Context Protocol) server that exposes all wallet operations as typed tools. AI agents call them directly via JSON-RPC over stdio — no shell spawning or output parsing needed.
 
-Add to your MCP config (`.mcp.json`, `.cursor/mcp.json`, etc.):
+### Claude Code
+
+Create `.mcp.json` in your project root:
 
 ```json
 {
   "mcpServers": {
     "midnight-wallet": {
-      "command": "npx",
-      "args": ["-y", "midnight-wallet-cli@latest", "--mcp"]
+      "command": "midnight-wallet-mcp"
     }
   }
 }
 ```
 
-See [MCP Server Guide](docs/mcp-server.md) for setup with Claude Code, Claude Desktop, Cursor, VS Code, and Windsurf.
+### Claude Desktop
 
-## Networks
+Add to `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) or `%APPDATA%\Claude\claude_desktop_config.json` (Windows):
 
-| Network | Description | Status |
-|---------|-------------|--------|
-| `undeployed` | Local network via Docker (`midnight localnet up`) | Supported |
+```json
+{
+  "mcpServers": {
+    "midnight-wallet": {
+      "command": "midnight-wallet-mcp"
+    }
+  }
+}
+```
 
-See [Networks](docs/networks.md) for configuration details.
+### Cursor
+
+Create `.cursor/mcp.json` in your project root:
+
+```json
+{
+  "mcpServers": {
+    "midnight-wallet": {
+      "command": "midnight-wallet-mcp"
+    }
+  }
+}
+```
+
+### VS Code (GitHub Copilot)
+
+Create `.vscode/mcp.json` in your project root:
+
+```json
+{
+  "servers": {
+    "midnight-wallet": {
+      "type": "stdio",
+      "command": "midnight-wallet-mcp"
+    }
+  }
+}
+```
+
+### Windsurf
+
+Add to `~/.codeium/windsurf/mcp_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "midnight-wallet": {
+      "command": "midnight-wallet-mcp"
+    }
+  }
+}
+```
+
+> **Tip:** If you haven't installed globally, use `"command": "npx"` with `"args": ["-y", "midnight-wallet-cli@latest", "--mcp"]` instead.
+
+### Available MCP Tools
+
+Once connected, your AI agent gets access to 17 tools:
+
+| Tool | Description |
+|------|-------------|
+| `midnight_generate` | Generate or restore a wallet |
+| `midnight_info` | Show wallet info (no secrets) |
+| `midnight_balance` | Check NIGHT balance |
+| `midnight_address` | Derive address from seed |
+| `midnight_genesis_address` | Show genesis wallet address |
+| `midnight_inspect_cost` | Show block cost limits |
+| `midnight_airdrop` | Fund wallet from genesis |
+| `midnight_transfer` | Send NIGHT tokens |
+| `midnight_dust_register` | Register UTXOs for dust generation |
+| `midnight_dust_status` | Check dust status |
+| `midnight_config_get` | Read config value |
+| `midnight_config_set` | Write config value |
+| `midnight_localnet_up` | Start local network |
+| `midnight_localnet_stop` | Stop local network |
+| `midnight_localnet_down` | Remove local network |
+| `midnight_localnet_status` | Show service status |
+| `midnight_localnet_clean` | Remove conflicting containers |
+
+See [MCP Server Guide](docs/mcp-server.md) for detailed setup and example workflows.
 
 ## Documentation
 
@@ -112,10 +199,11 @@ See [Networks](docs/networks.md) for configuration details.
 
 ## Requirements
 
-- **Node.js** >= 20
-- **Docker** (for `midnight localnet` commands)
+- Node.js >= 20
+- Docker (for `midnight localnet` commands)
+- A running proof server on `localhost:6300` (for transactions on undeployed network)
 
-## Issues
+## Issues & Feedback
 
 Found a bug or have a feature request? [Open an issue](https://github.com/nel349/midnight-wallet-cli-hub/issues).
 
