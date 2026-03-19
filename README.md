@@ -23,7 +23,11 @@ This installs two commands: `midnight` (or `mn` for short) and `midnight-wallet-
 
 | Command | Description |
 |---------|-------------|
-| `midnight generate` | Generate a new wallet or restore from seed/mnemonic |
+| `midnight wallet generate <name>` | Create a named wallet and set it as active |
+| `midnight wallet list` | List all wallets with active marker |
+| `midnight wallet use <name>` | Set the active wallet |
+| `midnight wallet info [name]` | Show wallet details |
+| `midnight wallet remove <name>` | Remove a wallet |
 | `midnight info` | Display wallet address, network, creation date |
 | `midnight balance [address]` | Check unshielded NIGHT balance |
 | `midnight transfer <to> <amount>` | Send NIGHT tokens to another address |
@@ -33,31 +37,86 @@ This installs two commands: `midnight` (or `mn` for short) and `midnight-wallet-
 | `midnight address --seed <hex>` | Derive an address from a seed |
 | `midnight genesis-address` | Show the genesis wallet address |
 | `midnight inspect-cost` | Display current block cost limits |
-| `midnight config get/set` | Manage persistent config (default network, etc.) |
+| `midnight serve` | Start DApp Connector server (WebSocket JSON-RPC) |
+| `midnight config get/set` | Manage persistent config (network, wallet, endpoints) |
+| `midnight cache clear` | Clear wallet state cache |
 | `midnight localnet up/stop/down/status` | Manage a local Midnight network via Docker |
 | `midnight help [command]` | Show usage for all or a specific command |
 
 ## Quick Start
+
+### Preprod (testnet)
+
+```bash
+# Generate a wallet
+midnight wallet generate alice --network preprod
+
+# Check balance
+midnight balance
+```
+
+### Local development
 
 ```bash
 # Start local network
 midnight localnet up
 
 # Generate a wallet
-midnight generate --network undeployed
+midnight wallet generate dev --network undeployed
 
 # Airdrop tokens and register dust
 midnight airdrop 1000
 midnight dust register
 
-# Check balance
+# Check balance and transfer
 midnight balance
-
-# Transfer NIGHT
 midnight transfer mn_addr_undeployed1... 100
 ```
 
 See [Getting Started](docs/getting-started.md) for a detailed walkthrough.
+
+## Supported Networks
+
+| Network | Description |
+|---------|-------------|
+| `undeployed` | Local network via Docker (`midnight localnet up`) |
+| `preprod` | Midnight pre-production testnet |
+| `preview` | Midnight preview testnet |
+
+Wallets are network-agnostic — one seed derives addresses for all three networks. Use `--network <name>` on any command, or persist it with `midnight config set network preview`.
+
+See [Networks](docs/networks.md) for configuration details.
+
+## DApp Connector
+
+`midnight serve` starts a WebSocket JSON-RPC server that implements the same `ConnectedAPI` interface as the Lace browser wallet. Any DApp can connect to it — no browser extension needed.
+
+```bash
+# Start the connector server
+midnight serve --network preview
+
+# Or auto-approve all requests (dev only)
+midnight serve --network preview --approve-all
+```
+
+To connect from your DApp, install the connector package:
+
+```bash
+npm install midnight-wallet-connector
+```
+
+```typescript
+import { createWalletClient } from 'midnight-wallet-connector';
+
+const wallet = await createWalletClient({
+  url: 'ws://localhost:9932',
+  networkId: 'Preview',
+});
+
+const balances = await wallet.getUnshieldedBalances();
+```
+
+See the [midnight-wallet-connector](https://www.npmjs.com/package/midnight-wallet-connector) package for the full API, and [midnight-starship](https://github.com/nel349/midnight-starship) for a working example DApp.
 
 ## JSON Output for Automation
 
@@ -79,14 +138,6 @@ When `--json` is active:
 Run `midnight help --json` for a full capability manifest, or `midnight help --agent` for a comprehensive AI agent reference.
 
 See [JSON Output Reference](docs/json-output.md) for all schemas and error codes.
-
-## Supported Networks
-
-| Network | Description |
-|---------|-------------|
-| `undeployed` | Local network via Docker (`midnight localnet up`) |
-
-See [Networks](docs/networks.md) for configuration details.
 
 ## MCP Server for AI Agents
 
@@ -167,11 +218,16 @@ Add to `~/.codeium/windsurf/mcp_config.json`:
 
 ### Available MCP Tools
 
-Once connected, your AI agent gets access to 17 tools:
+Once connected, your AI agent gets access to 24 tools:
 
 | Tool | Description |
 |------|-------------|
-| `midnight_generate` | Generate or restore a wallet |
+| `midnight_wallet_generate` | Create a named wallet |
+| `midnight_wallet_list` | List all wallets |
+| `midnight_wallet_use` | Set active wallet |
+| `midnight_wallet_info` | Show wallet details |
+| `midnight_wallet_remove` | Remove a wallet |
+| `midnight_generate` | Generate a wallet (deprecated) |
 | `midnight_info` | Show wallet info (no secrets) |
 | `midnight_balance` | Check NIGHT balance |
 | `midnight_address` | Derive address from seed |
@@ -183,6 +239,8 @@ Once connected, your AI agent gets access to 17 tools:
 | `midnight_dust_status` | Check dust status |
 | `midnight_config_get` | Read config value |
 | `midnight_config_set` | Write config value |
+| `midnight_config_unset` | Remove config value |
+| `midnight_cache_clear` | Clear wallet state cache |
 | `midnight_localnet_up` | Start local network |
 | `midnight_localnet_stop` | Stop local network |
 | `midnight_localnet_down` | Remove local network |
@@ -204,7 +262,7 @@ See [MCP Server Guide](docs/mcp-server.md) for detailed setup and example workfl
 
 - Node.js >= 20
 - Docker (for `midnight localnet` commands)
-- A running proof server on `localhost:6300` (for transactions on undeployed network)
+- A running proof server on `localhost:6300` (for transactions — required on all networks)
 
 ## Issues & Feedback
 

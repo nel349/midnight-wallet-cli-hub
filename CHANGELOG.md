@@ -2,7 +2,28 @@
 
 All notable changes to [midnight-wallet-cli](https://www.npmjs.com/package/midnight-wallet-cli) are documented here.
 
-## [0.2.0] - Unreleased
+## [0.2.1] - 2026-03-19
+
+### Added
+- **Network-agnostic wallets** — one seed derives addresses for all three networks (undeployed, preprod, preview). No more regenerating wallets when switching networks.
+- **Preview network** support — all commands now work on undeployed, preprod, and preview
+- **DApp Connector** (`midnight serve`) — WebSocket JSON-RPC server implementing the Lace `ConnectedAPI` interface
+- **[midnight-wallet-connector](https://www.npmjs.com/package/midnight-wallet-connector)** — npm package for connecting browser DApps to `mn serve`
+- `midnight wallet` subcommands — `generate`, `list`, `use`, `info`, `remove` for named multi-wallet management
+- `midnight cache clear` command for clearing wallet state cache
+- `--approve-all` and `--no-auto-approve-reads` flags on `midnight serve`
+
+### Changed
+- **Simplified network resolution** — 3-step chain (flag → config → fallback) instead of 5-step. Wallet file no longer influences network selection.
+- Wallet file format: `addresses` map replaces single `address` + `network` fields
+- Old wallet files auto-migrate on load (derives all addresses from seed, writes back)
+- `midnight generate` deprecated in favor of `midnight wallet generate <name>`
+
+### Fixed
+- Network confusion when wallet stored one network but config had another
+- Old wallets now work on any network without regeneration
+
+## [0.2.0] - 2026-03-11
 
 ### Changed
 - Upgraded Midnight SDK to v2.0.0-rc
