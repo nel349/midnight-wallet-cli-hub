@@ -2,6 +2,17 @@
 
 All notable changes to [midnight-wallet-cli](https://www.npmjs.com/package/midnight-wallet-cli) are documented here.
 
+## [0.2.5] - 2026-03-25
+
+### Changed
+- **Upgraded to ledger-v8** — mainnet-compatible ledger, wallet-sdk-facade 3.0.0, dust-wallet 3.0.0
+- **Stable Docker images** — localnet now uses production releases: node 0.22.3, indexer 4.0.0, proof-server 8.0.3 (was RC images)
+- All SDK dependencies bumped to latest stable versions (shielded 2.1.0, unshielded 2.1.0, address-format 3.1.0, capabilities 3.2.0, network-id 4.0.2, types 4.0.2)
+
+### Fixed
+- **Mnemonic-to-seed derivation** — now uses full 64-byte PBKDF2 seed from `mnemonicToSeedSync()`, matching Lace wallet. Wallets restored from mnemonic now produce the same addresses as Lace.
+- Verbose logging (`--verbose`) now works on `midnight airdrop`
+
 ## [0.2.1] - 2026-03-19
 
 ### Added
