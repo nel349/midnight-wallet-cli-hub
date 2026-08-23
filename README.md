@@ -1,5 +1,13 @@
 # midnight-wallet-cli
 
+> # 📦 This repository has moved — archived & read-only
+>
+> The source code, issue tracking, and current documentation now live in the main repository:
+>
+> ### 👉 **https://github.com/nel349/midnight-wallet-cli**
+>
+> This repo was a documentation/landing mirror from when the CLI's source was private. Now that the source is **public**, everything lives there — please file issues and follow development at the link above. The CLI itself is unchanged: `npm install -g midnight-wallet-cli`.
+
 ![midnight-wallet-cli demo](docs/midnight-cli-gif.gif)
 
 [![npm version](https://badge.fury.io/js/midnight-wallet-cli.svg)](https://www.npmjs.com/package/midnight-wallet-cli)
@@ -9,7 +17,7 @@
 
 A standalone CLI wallet for the [Midnight](https://midnight.network) blockchain. Manage wallets, check balances, transfer NIGHT tokens, and run a local network — all from the terminal.
 
-> **Note:** This repository hosts documentation and issue tracking. Source code will be open-sourced in a future release.
+> **Note:** The source is now open at **https://github.com/nel349/midnight-wallet-cli** — this repository is archived.
 
 ## Install
 
